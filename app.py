@@ -21,7 +21,7 @@ def plants_list():
 
     # TODO: Replace the following line with a database call to retrieve *all*
     # plants from the Mongo database's `plants` collection.
-    plants_data = ''
+    plants_data = mongo.db.plants.find({})
 
     context = {
         'plants': plants_data,
@@ -37,19 +37,20 @@ def about():
 def create():
     """Display the plant creation page & process data from the creation form."""
     if request.method == 'POST':
-        # TODO: Get the new plant's name, variety, photo, & date planted, and 
-        # store them in the object below.
         new_plant = {
-            'name': '',
-            'variety': '',
-            'photo_url': '',
-            'date_planted': ''
+            'name': request.form.get('plant_name'),
+            'variety': request.form.get('variety'),
+            'photo_url': request.form.get('photo'),
+            'date_planted': request.form.get('date_planted')
         }
         # TODO: Make an `insert_one` database call to insert the object into the
         # database's `plants` collection, and get its inserted id. Pass the 
         # inserted id into the redirect call below.
 
-        return redirect(url_for('detail', plant_id=''))
+        push_plant = mongo.db.plants.insert_one(new_plant)
+
+
+        return redirect(url_for('detail', plant_id=push_plant.inserted_id))
 
     else:
         return render_template('create.html')
@@ -60,19 +61,19 @@ def detail(plant_id):
 
     # TODO: Replace the following line with a database call to retrieve *one*
     # plant from the database, whose id matches the id passed in via the URL.
-    plant_to_show = ''
+    plant_to_show = mongo.db.plants.find_one({'_id': ObjectId(plant_id)})
 
     # TODO: Use the `find` database operation to find all harvests for the
     # plant's id.
     # HINT: This query should be on the `harvests` collection, not the `plants`
     # collection.
-    harvests = ''
+    harvests = mongo.db.harvests.find({'_id': ObjectId(plant_id)})
 
     context = {
         'plant' : plant_to_show,
         'harvests': harvests
     }
-    return render_template('detail.html', **context)
+    return render_template('detail.html', context=context)
 
 @app.route('/harvest/<plant_id>', methods=['POST'])
 def harvest(plant_id):
@@ -83,14 +84,14 @@ def harvest(plant_id):
     # TODO: Create a new harvest object by passing in the form data from the
     # detail page form.
     new_harvest = {
-        'quantity': '', # e.g. '3 tomatoes'
-        'date': '',
+        'quantity': request.form.get('harvested_amount'), # e.g. '3 tomatoes'
+        'date': request.form.get('date_planted'),
         'plant_id': plant_id
     }
 
     # TODO: Make an `insert_one` database call to insert the object into the 
     # `harvests` collection of the database.
-
+    mongo.db.harvests.insert_one(new_harvest)
     return redirect(url_for('detail', plant_id=plant_id))
 
 @app.route('/edit/<plant_id>', methods=['GET', 'POST'])
@@ -99,19 +100,27 @@ def edit(plant_id):
     if request.method == 'POST':
         # TODO: Make an `update_one` database call to update the plant with the
         # given id. Make sure to put the updated fields in the `$set` object.
+        mongo.db.plants.update_one({'_id': ObjectId(plant_id)}, 
+        {'$set': { 'name': request.form.get('plant_name'),
+                    'variety': request.form.get('variety'),
+                    'photo': request.form.get('photo'),
+                    'date_planted': request.form.get('date_planted')}
+        }
+)
+
 
         
         return redirect(url_for('detail', plant_id=plant_id))
     else:
         # TODO: Make a `find_one` database call to get the plant object with the
         # passed-in _id.
-        plant_to_show = ''
+        plant_to_show = mongo.db.plants.find_one({'_id': ObjectId(plant_id)})
 
         context = {
             'plant': plant_to_show
         }
 
-        return render_template('edit.html', **context)
+        return render_template('edit.html', context=context)
 
 @app.route('/delete/<plant_id>', methods=['POST'])
 def delete(plant_id):
