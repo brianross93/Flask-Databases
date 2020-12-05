@@ -63,12 +63,12 @@
             
             <ul>
                 {%for harvest in harvests%}
-                <li>{{harvest.date}}: harvest</li>
+                <li>harvest</li>
                 {%endfor%}
             </ul>
         </section>
 
-        <form action="/delete/123456" method='POST' id="delete-form" onsubmit="return confirm_delete()">
+        <form action="/delete/{{context.plant._id}}" method='POST' id="delete-form" onsubmit="return confirm_delete()">
             <input type="submit" class="nav" onclick="delete_modal()" value="Delete Plant">
         </form>
 </main>

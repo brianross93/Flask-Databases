@@ -19,8 +19,7 @@ mongo = PyMongo(app)
 def plants_list():
     """Display the plants list page."""
 
-    # TODO: Replace the following line with a database call to retrieve *all*
-    # plants from the Mongo database's `plants` collection.
+    
     plants_data = mongo.db.plants.find({})
 
     context = {
@@ -43,9 +42,7 @@ def create():
             'photo_url': request.form.get('photo'),
             'date_planted': request.form.get('date_planted')
         }
-        # TODO: Make an `insert_one` database call to insert the object into the
-        # database's `plants` collection, and get its inserted id. Pass the 
-        # inserted id into the redirect call below.
+       
 
         push_plant = mongo.db.plants.insert_one(new_plant)
 
@@ -76,16 +73,14 @@ def harvest(plant_id):
     Accepts a POST request with data for 1 harvest and inserts into database.
     """
 
-    # Create a new harvest object by passing in the form data from the
-    # detail page form.
+    
     new_harvest = {
         'quantity': request.form.get('harvested_amount'), # e.g. '3 tomatoes'
         'date': request.form.get('date_planted'),
         'plant_id': plant_id
     }
 
-    # Make an `insert_one` database call to insert the object into the 
-    # `harvests` collection of the database.
+    
     mongo.db.harvests.insert_one(new_harvest)
     return redirect(url_for('detail', plant_id=plant_id))
 
@@ -122,8 +117,10 @@ def delete(plant_id):
     # TODO: Make a `delete_one` database call to delete the plant with the given
     # id.
 
-    # TODO: Also, make a `delete_many` database call to delete all harvests with
-    # the given plant id.
+    mongo.db.plants.delete_one({'_id': ObjectId(plant_id)})
+
+  
+    mongo.db.plants.delete_many({'plant_id': plant_id})
 
     return redirect(url_for('plants_list'))
 
