@@ -14,8 +14,8 @@ load_dotenv()
 MONGODB_USERNAME = os.getenv('brian.ross@students.makeschool.com')
 MONGODB_PASSWORD = os.getenv('Famtyr54bvhg')
 MONGODB_DBNAME = 'mydb'
-client = pymongo.MongoClient("mongodb+srv://MainU:<Famtyr54bvhg>@cluster0.onagw.mongodb.net/<databasebross>?retryWrites=true&w=majority")
-db = client.test
+# client = pymongo.MongoClient("mongodb+srv://MainU:<Famtyr54bvhg>@cluster0.onagw.mongodb.net/<databasebross>?retryWrites=true&w=majority")
+# db = client.test
 
 app = Flask(__name__)
 
