@@ -3,6 +3,7 @@ from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from pymongo import MongoClient
 from dotenv import load_dotenv
+import os
 
 ############################################################
 # SETUP
@@ -34,7 +35,7 @@ def plants_list():
     """Display the plants list page."""
 
     
-    plants_data = mongo.db.plants.find({})
+    plants_data = db.plants.find({})
 
     context = {
         'plants': plants_data,
@@ -58,7 +59,7 @@ def create():
         }
        
 
-        push_plant = mongo.db.plants.insert_one(new_plant)
+        push_plant = db.plants.insert_one(new_plant)
 
 
         return redirect(url_for('detail', plant_id=push_plant.inserted_id))
@@ -70,10 +71,10 @@ def create():
 def detail(plant_id):
     """Display the plant detail page & process data from the harvest form."""
 
-    plant_to_show = mongo.db.plants.find_one({'_id': ObjectId(plant_id)})
+    plant_to_show = db.plants.find_one({'_id': ObjectId(plant_id)})
 
    
-    harvests = mongo.db.harvests.find({'plant_id': ObjectId(plant_id)})
+    harvests = db.harvests.find({'plant_id': ObjectId(plant_id)})
 
     context = {
         'plant' : plant_to_show,
@@ -95,7 +96,7 @@ def harvest(plant_id):
     }
 
     
-    mongo.db.harvests.insert_one(new_harvest)
+    db.harvests.insert_one(new_harvest)
     return redirect(url_for('detail', plant_id=plant_id))
 
 @app.route('/edit/<plant_id>', methods=['GET', 'POST'])
@@ -104,7 +105,7 @@ def edit(plant_id):
     if request.method == 'POST':
         # Make an `update_one` database call to update the plant with the
         # given id. Make sure to put the updated fields in the `$set` object.
-        mongo.db.plants.update_one({'_id': ObjectId(plant_id)}, 
+        db.plants.update_one({'_id': ObjectId(plant_id)}, 
         {'$set': { 'name': request.form.get('plant_name'),
                     'variety': request.form.get('variety'),
                     'photo': request.form.get('photo'),
@@ -118,7 +119,7 @@ def edit(plant_id):
     else:
         # TODO: Make a `find_one` database call to get the plant object with the
         # passed-in _id.
-        plant_to_show = mongo.db.plants.find_one({'_id': ObjectId(plant_id)})
+        plant_to_show = db.plants.find_one({'_id': ObjectId(plant_id)})
 
         context = {
             'plant': plant_to_show
@@ -131,10 +132,10 @@ def delete(plant_id):
     # TODO: Make a `delete_one` database call to delete the plant with the given
     # id.
 
-    mongo.db.plants.delete_one({'_id': ObjectId(plant_id)})
+    db.plants.delete_one({'_id': ObjectId(plant_id)})
 
   
-    mongo.db.plants.delete_many({'plant_id': plant_id})
+    db.plants.delete_many({'plant_id': plant_id})
 
     return redirect(url_for('plants_list'))
 
