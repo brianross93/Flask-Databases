@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, render_template, url_for
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from pymongo import MongoClient
+import pymongo
 from dotenv import load_dotenv
 import os
 
@@ -17,8 +18,8 @@ MONGODB_DBNAME = 'databasebross'
 
 app = Flask(__name__)
 
-client = MongoClient(f"mongodb+srv://databasebross:Usv61qcx@cluster0.idqxn.mongodb.net/databasebross?retryWrites=true&w=majority")
-db = client[MONGODB_DBNAME]
+client = pymongo.MongoClient("mongodb+srv://databasebross:Usv61qcx@cluster0.onagw.mongodb.net/databasebross?retryWrites=true&w=majority")
+db = client.test
 
 
 
@@ -70,6 +71,7 @@ def detail(plant_id):
     """Display the plant detail page & process data from the harvest form."""
 
     plant_to_show = db.plants.find_one({'_id': ObjectId(plant_id)})
+    print(plant_to_show)
 
    
     harvests = db.harvests.find({'plant_id': ObjectId(plant_id)})
@@ -78,7 +80,7 @@ def detail(plant_id):
         'plant' : plant_to_show,
         'harvests': harvests
     }
-    return render_template('detail.html', context=context)
+    return render_template('detail.html', **context)
 
 @app.route('/harvest/<plant_id>', methods=['POST'])
 def harvest(plant_id):
@@ -106,7 +108,7 @@ def edit(plant_id):
         db.plants.update_one({'_id': ObjectId(plant_id)}, 
         {'$set': { 'name': request.form.get('plant_name'),
                     'variety': request.form.get('variety'),
-                    'photo': request.form.get('photo'),
+                    'photo_url': request.form.get('photo'),
                     'date_planted': request.form.get('date_planted')}
         }
 )
